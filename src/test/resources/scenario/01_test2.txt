@@ -1,0 +1,61 @@
+*	Chatserver	chatserver
+*	Client		alice.vienna.at
+*	Client		bill.de
+
+alice.vienna.at:	!login alice.vienna.at 12345
+>					verify("success")
+
+alice.vienna.at:	!login alice.vienna.at 12345
+>					verify("already logged in")
+
+bill.de:			!login alice.vienna.at 12345
+>					verify("already logged in")
+
+bill.de:			!login bill.de 23456
+>					verify("success")
+
+alice.vienna.at:	!list
+>					verify(".*alice.*.*bill.*", T(test.util.Flag).REGEX)
+
+chatserver:			!users
+>					verify(".*alice.*online.*bill.*online.*", T(test.util.Flag).REGEX)
+
+bill.de:			!msg alice.vienna.at yo?
+>					verify("not reachable")
+
+alice.vienna.at:	!register 127.0.0.1:1234
+>					verify("success")
+
+alice.vienna.at:	!lookup hanspeter
+>					verify("not reachable")
+
+bill.de:			!msg alice.vienna.at yo!
+>					verify("!ack")
+
+bill.de:			!register 127.0.0.1:1235
+>					verify("success")
+
+alice.vienna.at:	!msg bill.de yoo
+>					verify("!ack")
+
+alice.vienna.at:	!send public message ????
+>					verify("alice")
+
+bill.de:			!lastMsg
+>					verify("alice")
+
+alice.vienna.at:	!lastMsg
+>					verify("no message received")
+
+bill.de:			!logout
+>					verify("success")
+
+alice.vienna.at:	!msg bill.de yo?
+>					verify("error")
+
+chatserver:			!users
+>					verify(".*alice.*online.*bill.*offline.*", T(test.util.Flag).REGEX)
+
+chatserver: 		!exit
+alice.vienna.at:	!exit
+bill.de:			!exit
